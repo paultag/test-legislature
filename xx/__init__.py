@@ -1,9 +1,11 @@
-from pupa.models.jurisdiction import Jurisdiction
+# from pupa.models.jurisdiction import Jurisdiction
+from pupa.scrape.jurisdiction import Jurisdiction
 from pupa.scrape import Scraper, Legislator
 
 
 class MassiveScraper(Scraper):
-    def scrape(self):
+
+    def _do_scrape(self):
         people = [
             {"name": "Miss Mckenzie A. Cannon", "post_id": "10a",
              "chamber": "upper",},
@@ -45,23 +47,21 @@ class MassiveScraper(Scraper):
              "name": "Callie Craig", "party": "republican"},
         ]
         for person in people:
-            l = Legislature(**person)
+            l = Legislator(**person)
             l.add_source("http://example.com")
             yield l
+
+    get_people = _do_scrape
 
 
 class TestLegislature(Jurisdiction):
     jurisdiction_id = "ocd-jurisdiction/country:xx/legislature"
-    name = "Test State Legislature"
-    url = "http://example.com/legislature"
 
-    scrapers = {
-        "people": MassiveScraper
-    }
+    def get_metadata(self):
+        return { 'name': 'Chicago City Council', 'url': 'https://chicago.legistar.com/', 'terms': [{ 'name': '2011-2015', 'sessions': ['2011'], 'start_year': 2011, 'end_year': 2015 }], 'provides': ['people'], 'parties': [ {'name': 'Democrats' } ], 'session_details': { '2011': {'_scraped_name': '2011'} }, 'feature_flags': [], } 
 
-    chambers = {
-        'upper': {
-        },
-        'lower': {
-        },
-    }
+    def scrape_session_list(self):
+        return ["2011",]
+
+    def get_scraper(self, *args):
+        return MassiveScraper
