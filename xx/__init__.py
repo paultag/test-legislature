@@ -53,7 +53,14 @@ class MassiveScraper(Scraper):
         for committee in committees:
             c = Committee(name=committee['name'])
             c.add_source("http://example.com")
-            for member in committee['members']:
+            c.add_contact_detail(type='email', value="committee@example.com",
+                                 note='committee email')
+
+
+            members = iter(committee['members'])
+            chair = next(members)
+            c.add_member(name=chair, role='chair')
+            for member in members:
                 c.add_member(name=member)
             yield c
 
@@ -102,6 +109,14 @@ class MassiveScraper(Scraper):
         for person in people:
             l = Legislator(**person)
             l.add_source("http://example.com")
+            dslug = (
+                person['post_id'].lower().replace(" ", "-").replace(",", "")
+            )
+            l.add_contact_detail(
+                type='email',
+                value="%s@legislature.example.com" % (dslug),
+                note='office email'
+            )
             yield l
 
         yield from self.get_committees()
