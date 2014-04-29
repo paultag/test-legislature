@@ -141,6 +141,13 @@ class MassiveScraper(Scraper):
                          session=vote['session'],
                         )
                 v.add_source("http://example.com/votes/vote.xls")
+
+                for yv in vote['roll']['yes']:
+                    v.yes(yv)
+
+                for nv in vote['roll']['no']:
+                    v.no(nv)
+
                 yield v
 
 
