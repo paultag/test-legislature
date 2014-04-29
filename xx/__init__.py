@@ -1,15 +1,67 @@
 # from pupa.models.jurisdiction import Jurisdiction
 from pupa.scrape.jurisdiction import Jurisdiction
-from pupa.scrape import Scraper, Legislator
+from pupa.scrape import Scraper, Legislator, Committee
 
 
 class MassiveScraper(Scraper):
 
-    def _do_scrape(self):
+    def get_committees(self):
+        committees = [
+            {"name": "Ways and Means", "members": [
+                "Mckenzie A. Cannon",
+                "Yandel V. Watkins",
+            ]},
+            {"name": "Committee on Pudding Pops", "members": [
+                "Kohen Dudley",
+                "Cayden Norman",
+                "Shayla Fritz",
+                "Gunnar Luna",
+            ]},
+            {"name": "Fiscal Committee", "members": [
+                "Gunnar Luna",
+                "Regina Cruz",
+                "Makenzie Keller",
+                "Eliana Meyer",
+                "Taylor Parrish",
+                "Callie Craig",
+            ]},
+            {"name": "Bills in the Third Read", "members": [
+                "Mckenzie A. Cannon",
+                "Yandel V. Watkins",
+                "Adrien A. Coffey",
+                "Natasha Moon",
+                "Ramon Harmon",
+                "Sam Sellers",
+            ]},
+            {"name": "Rules", "members": [
+                "Shayla Fritz",
+                "Gunnar Luna",
+                "Regina Cruz",
+            ]},
+            {"name": "Standing Committee on Public Safety", "members": [
+                "Adrien A. Coffey",
+                "Natasha Moon",
+                "Ramon Harmon",
+                "Sam Sellers",
+                "Estrella Hahn",
+                "Teagan Rojas",
+                "Barrett Adams",
+                "Kayla Shelton",
+            ]},
+        ]
+
+        for committee in committees:
+            c = Committee(name=committee['name'])
+            c.add_source("http://example.com")
+            for member in committee['members']:
+                c.add_member(name=member)
+            yield c
+
+    def get_people(self):
         people = [
-            {"name": "Miss Mckenzie A. Cannon", "post_id": "10a",
+            {"name": "Mckenzie A. Cannon", "post_id": "10a",
              "chamber": "upper",},
-            {"name": "Mr. Yandel V. Watkins",
+            {"name": "Yandel V. Watkins",
              "post_id": "Second Fnord and Norfolk", "chamber": "lower",},
             {"name": "Adrien A. Coffey", "post_id": "A", "chamber": "upper",},
             {"post_id": "10c", "chamber": "lower", "name": "Natasha Moon",
@@ -46,12 +98,13 @@ class MassiveScraper(Scraper):
             {"post_id": "Silver", "chamber": "lower",
              "name": "Callie Craig", "party": "republican"},
         ]
+
         for person in people:
             l = Legislator(**person)
             l.add_source("http://example.com")
             yield l
 
-    get_people = _do_scrape
+        yield from self.get_committees()
 
 
 class TestLegislature(Jurisdiction):
