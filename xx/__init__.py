@@ -70,6 +70,7 @@ class MassiveScraper(Scraper):
             {"name": "HB101",
              "title": "Joint county ditch proceedings-conduct by teleconference or video conference",
              "session": "2011",
+             "versions": ["http://example.com/HB101.pdf"],
              "sponsors_people": [
                 "Shayla Fritz",
                 "Gunnar Luna",
@@ -92,6 +93,9 @@ class MassiveScraper(Scraper):
             for sponsor in bill['sponsors_committee']:
                 b.add_sponsor(name=sponsor, sponsorship_type='primary',
                               entity_type='organization', primary=True)
+
+            for version in bill['versions']:
+                b.add_version_link(name="Bill Version", url=version)
 
             yield b
 
