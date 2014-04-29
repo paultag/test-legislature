@@ -1,6 +1,7 @@
 # from pupa.models.jurisdiction import Jurisdiction
 from pupa.scrape.jurisdiction import Jurisdiction
 from pupa.scrape import Scraper, Legislator, Committee
+from pupa.models.bill import Bill
 
 
 class MassiveScraper(Scraper):
@@ -64,6 +65,37 @@ class MassiveScraper(Scraper):
                 c.add_member(name=member)
             yield c
 
+    def get_bills(self):
+        bills = [
+            {"name": "HB101",
+             "title": "Joint county ditch proceedings-conduct by teleconference or video conference",
+             "session": "2011",
+             "sponsors_people": [
+                "Shayla Fritz",
+                "Gunnar Luna",
+             ],
+             "sponsors_committee": [
+                 "Standing Committee on Public Safety",
+             ]},
+        ]
+        for bill in bills:
+            b = Bill(name=bill['name'],
+                     title=bill['title'],
+                     session=bill['session'])
+            b.add_source("ftp://example.com/some/bill")
+
+
+            for sponsor in bill['sponsors_people']:
+                b.add_sponsor(name=sponsor, sponsorship_type='primary',
+                              entity_type='person', primary=True)
+
+            for sponsor in bill['sponsors_committee']:
+                b.add_sponsor(name=sponsor, sponsorship_type='primary',
+                              entity_type='organization', primary=True)
+
+            yield b
+
+
     def get_people(self):
         people = [
             {"name": "Mckenzie A. Cannon", "post_id": "10a",
@@ -120,13 +152,25 @@ class MassiveScraper(Scraper):
             yield l
 
         yield from self.get_committees()
+        yield from self.get_bills()
 
 
 class TestLegislature(Jurisdiction):
     jurisdiction_id = "ocd-jurisdiction/country:xx/legislature"
 
     def get_metadata(self):
-        return { 'name': 'Chicago City Council', 'url': 'https://chicago.legistar.com/', 'terms': [{ 'name': '2011-2015', 'sessions': ['2011'], 'start_year': 2011, 'end_year': 2015 }], 'provides': ['people'], 'parties': [ {'name': 'Democrats' } ], 'session_details': { '2011': {'_scraped_name': '2011'} }, 'feature_flags': [], } 
+        return { 'name': 'Chicago City Council',
+                'url': 'https://chicago.legistar.com/',
+                'terms': [{ 'name': '2011-2015', 'sessions': ['2011'],
+                           'start_year': 2011, 'end_year': 2015 }],
+                'provides': ['people',],
+                'parties': [
+                ],
+                'session_details': {
+                    '2011': {'_scraped_name': '2011'}
+                },
+                'feature_flags': [],
+       }
 
     def scrape_session_list(self):
         return ["2011",]
