@@ -71,6 +71,26 @@ class MassiveScraper(Scraper):
              "title": "Joint county ditch proceedings-conduct by teleconference or video conference",
              "session": "2011",
              "versions": ["http://example.com/HB101.pdf"],
+             "actions": [
+                 {"description": "Introduced",
+                  "actor": "council",
+                  "date": "2014-04-15",},
+                 {"description": "Referred to the Committee on Pudding Pops",
+                  "actor": "council",
+                  "date": "2014-04-16",},
+                 {"description": "Reported favorably",
+                  "actor": "council",
+                  "date": "2014-04-16",},
+                 {"description": "Referred to the Bills in the Third Read",
+                  "actor": "council",
+                  "date": "2014-04-17",},
+                 {"description": "Vote by the Committee on the Whole. Do pass.",
+                  "actor": "council",
+                  "date": "2014-04-18",},
+                 {"description": "Signed into law",
+                  "actor": "council",
+                  "date": "2014-04-19",},
+             ],
              "sponsors_people": [
                 "Shayla Fritz",
                 "Gunnar Luna",
@@ -96,6 +116,9 @@ class MassiveScraper(Scraper):
 
             for version in bill['versions']:
                 b.add_version_link(name="Bill Version", url=version)
+
+            for action in bill['actions']:
+                b.add_action(**action)
 
             yield b
 
@@ -163,8 +186,8 @@ class TestLegislature(Jurisdiction):
     jurisdiction_id = "ocd-jurisdiction/country:xx/legislature"
 
     def get_metadata(self):
-        return { 'name': 'Chicago City Council',
-                'url': 'https://chicago.legistar.com/',
+        return {'name': 'Test City Council',
+                'url': 'https://example.com/',
                 'terms': [{ 'name': '2011-2015', 'sessions': ['2011'],
                            'start_year': 2011, 'end_year': 2015 }],
                 'provides': ['people',],
