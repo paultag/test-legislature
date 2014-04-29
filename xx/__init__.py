@@ -2,6 +2,7 @@
 from pupa.scrape.jurisdiction import Jurisdiction
 from pupa.scrape import Scraper, Legislator, Committee
 from pupa.models.bill import Bill
+from pupa.models.vote import Vote
 
 
 class MassiveScraper(Scraper):
@@ -97,13 +98,50 @@ class MassiveScraper(Scraper):
              ],
              "sponsors_committee": [
                  "Standing Committee on Public Safety",
-             ]},
+             ],
+            "votes": [
+                {"motion": "Vote by the Committee on the Whole.",
+                 "yes_count": 3,
+                 "no_count": 1,
+                 "passed": True,
+                 "type": "passage",
+                 "date": "2014-04-18",
+                 "session": "2011",
+                 "roll": {
+                     "yes": [
+                        "Gunnar Luna",
+                        "Regina Cruz",
+                        "Makenzie Keller",
+                     ],
+                     "no": [
+                        "Eliana Meyer",
+                     ],
+                     "other": [
+                     ],
+                 }
+                },
+            ]},
         ]
+
         for bill in bills:
             b = Bill(name=bill['name'],
                      title=bill['title'],
                      session=bill['session'])
             b.add_source("ftp://example.com/some/bill")
+
+
+            for vote in bill['votes']:
+                v = Vote(motion=vote['motion'],
+                         organization="Test City Council",
+                         yes_count=vote['yes_count'],
+                         no_count=vote['no_count'],
+                         passed=vote['passed'],
+                         type=vote['type'],
+                         date=vote['date'],
+                         session=vote['session'],
+                        )
+                v.add_source("http://example.com/votes/vote.xls")
+                yield v
 
 
             for sponsor in bill['sponsors_people']:
