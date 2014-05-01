@@ -68,6 +68,59 @@ class MassiveScraper(Scraper):
 
     def get_bills(self):
         bills = [
+            {"name": "HB500",
+             "title": "Makes various changes to provisions governing employment practices",
+             "session": "2011",
+             "versions": ["http://example.com/HB500.pdf"],
+             "actions": [
+                 {"description": "Introduced",
+                  "actor": "council",
+                  "date": "2014-04-15",},
+
+                 {"date": "2014-04-15",
+                  "description": "Read first time. Referred to Committee on Commerce and Labor. To printer.",
+                  "actor": "council" },
+
+                 {"date": "2014-04-15",
+                  "description": "From printer. To committee.",
+                  "actor": "lower"},
+
+                 {"date": "2014-04-15",
+                  "description": "From committee: Do pass.",
+                  "actor": "lower"},
+
+                 {"description": "Signed into law",
+                  "actor": "council",
+                  "date": "2014-04-19",},
+             ],
+             "sponsors_people": [
+             ],
+             "sponsors_committee": [
+             ],
+            "votes": [
+                {"motion": "Vote by the Committee on the Whole.",
+                 "yes_count": 1,
+                 "other_count": 1,
+                 "no_count": 3,
+                 "passed": True,
+                 "type": "passage",
+                 "date": "2014-04-15",
+                 "session": "2011",
+                 "roll": {
+                     "yes": [
+                        "Eliana Meyer",
+                     ],
+                     "no": [
+                        "Gunnar Luna",
+                        "Regina Cruz",
+                        "Makenzie Keller",
+                     ],
+                     "other": [
+                        "Unknown Person",
+                     ],
+                 }
+                },
+            ]},
             {"name": "HB101",
              "title": "Joint county ditch proceedings-conduct by teleconference or video conference",
              "session": "2011",
