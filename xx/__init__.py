@@ -1,9 +1,7 @@
 # from pupa.models.jurisdiction import Jurisdiction
 from pupa.scrape.jurisdiction import Jurisdiction
 from pupa.scrape import Scraper, Legislator, Committee
-from pupa.models.bill import Bill
-from pupa.models.vote import Vote
-from pupa.models.event import Event
+from pupa.scrape import Bill, Vote, Event
 import datetime as dt
 
 
@@ -376,50 +374,34 @@ class MassiveScraper(Scraper):
 
     def get_people(self):
         people = [
-            {"name": "Mckenzie A. Cannon", "post_id": "10a",},
+            {"name": "Mckenzie A. Cannon", "district": "10a",},
             {"name": "Yandel V. Watkins",
-             "post_id": "Second Fnord and Norfolk",},
-            {"name": "Adrien A. Coffey", "post_id": "A",},
-            {"post_id": "10c", "name": "Natasha Moon",
-             "party": "Democratic"},
-            {"post_id": "Berkshire, Hampshire, Franklin and Hampden",
-             "name": "Ramon Harmon",
-             "party": "Republican"},
-            {"post_id": "5", "name": "Sam Sellers",
-             "party": "Republican"},
-            {"post_id": "6", "name": "Estrella Hahn",
-             "party": "Republican"},
-            {"post_id": "B",  "name": "Teagan Rojas",
-             "party": "Democratic"},
-            {"post_id": "C", "name": "Barrett Adams",
-             "party": "Republican"},
-            {"post_id": "D", "name": "Kayla Shelton",
-             "party": "Democratic"},
-            {"post_id": "E", "name": "Kohen Dudley",
-             "party": "Republican"},
-            {"post_id": "F", "name": "Cayden Norman",
-             "party": "Republican"},
-            {"post_id": "ZZ", "name": "Shayla Fritz",
-             "party": "Democratic"},
-            {"post_id": "Ward 2", "name": "Gunnar Luna",
-             "party": "Democratic"},
-            {"post_id": "Green", "name": "Regina Cruz",
-             "party": "Republican"},
-            {"post_id": "Blue", "name": "Makenzie Keller",
-             "party": "Republican"},
-            {"post_id": "Red", "name": "Eliana Meyer",
-             "party": "Republican"},
-            {"post_id": "Yellow", "name": "Taylor Parrish",
-             "party": "Democratic"},
-            {"post_id": "Silver",
-             "name": "Callie Craig", "party": "Republican"},
+             "district": "Second Fnord and Norfolk",},
+            {"name": "Adrien A. Coffey", "district": "A",},
+            {"district": "10c", "name": "Natasha Moon",},
+            {"district": "Berkshire, Hampshire, Franklin and Hampden",
+             "name": "Ramon Harmon",},
+            {"district": "5", "name": "Sam Sellers",},
+            {"district": "6", "name": "Estrella Hahn",},
+            {"district": "B",  "name": "Teagan Rojas",},
+            {"district": "C", "name": "Barrett Adams",},
+            {"district": "D", "name": "Kayla Shelton",},
+            {"district": "E", "name": "Kohen Dudley",},
+            {"district": "F", "name": "Cayden Norman",},
+            {"district": "ZZ", "name": "Shayla Fritz",},
+            {"district": "Ward 2", "name": "Gunnar Luna",},
+            {"district": "Green", "name": "Regina Cruz",},
+            {"district": "Blue", "name": "Makenzie Keller",},
+            {"district": "Red", "name": "Eliana Meyer",},
+            {"district": "Yellow", "name": "Taylor Parrish",},
+            {"district": "Silver", "name": "Callie Craig",},
         ]
 
         for person in people:
             l = Legislator(**person)
             l.add_source("http://example.com")
             dslug = (
-                person['post_id'].lower().replace(" ", "-").replace(",", ""))
+                person['district'].lower().replace(" ", "-").replace(",", ""))
             l.add_contact_detail(
                 type='email',
                 value="%s@legislature.example.com" % (dslug),
@@ -427,32 +409,35 @@ class MassiveScraper(Scraper):
             )
             yield l
 
+    def scrape(self):
+        yield from self.get_people()
         yield from self.get_events()
-        # yield from self.get_committees()
-        # yield from self.get_bills()
+        yield from self.get_committees()
+        yield from self.get_bills()
+
 
 
 class TestLegislature(Jurisdiction):
     jurisdiction_id = "ocd-jurisdiction/country:xx/legislature"
+    name = "Test City Council"
+    url = "http://example.com"
 
-    def get_metadata(self):
-        return {'name': 'Test City Council',
-                'url': 'https://example.com/',
-                'terms': [{ 'name': '2011-2015', 'sessions': ['2011'],
-                           'start_year': 2011, 'end_year': 2015 }],
-                'provides': ['people',],
-                'parties': [
-                    {"name": "Republican"},
-                    {"name": "Democratic"},
-                ],
-                'session_details': {
-                    '2011': {'_scraped_name': '2011'},
-                },
-                'feature_flags': [],
-       }
+    scrapers = {
+        "people": MassiveScraper,
+    }
 
-    def scrape_session_list(self):
-        return ["2011",]
-
-    def get_scraper(self, *args):
-        return MassiveScraper
+    # def get_metadata(self):
+    #     return {'name': 'Test City Council',
+    #             'url': 'https://example.com/',
+    #             'terms': [{ 'name': '2011-2015', 'sessions': ['2011'],
+    #                        'start_year': 2011, 'end_year': 2015 }],
+    #             'provides': ['people',],
+    #             'parties': [
+    #                 {"name": "Republican"},
+    #                 {"name": "Democratic"},
+    #             ],
+    #             'session_details': {
+    #                 '2011': {'_scraped_name': '2011'},
+    #             },
+    #             'feature_flags': [],
+    #    }
