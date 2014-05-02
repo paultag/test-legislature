@@ -3,6 +3,8 @@ from pupa.scrape.jurisdiction import Jurisdiction
 from pupa.scrape import Scraper, Legislator, Committee
 from pupa.models.bill import Bill
 from pupa.models.vote import Vote
+from pupa.models.event import Event
+import datetime as dt
 
 
 class MassiveScraper(Scraper):
@@ -221,6 +223,157 @@ class MassiveScraper(Scraper):
             yield b
 
 
+    def get_events(self):
+        events = [
+            {"name": "Meeting of the Join Committee on Foo",
+             "when": dt.datetime.fromtimestamp(1408923205),
+             "location": "Somewhere just east of Northwestsouthshire"},
+            {"name": "Meeting of the Join Committee on Bar",
+             "when": dt.datetime.fromtimestamp(1008923205),
+             "location": "Council Chambers",
+             "_location": {
+                 "name": "Council Chambers",
+                 "url": "http://somewhere.example.com",
+                 "note": "Council Chambers, first room on the left in city hall",
+                 "coordinates": {
+                     "latitude": "42.360391",
+                     "longitude": "-71.058004",
+                 }
+            }},
+            {"name": "Meeting of the Join Committee on Baz",
+             "when": dt.datetime.fromtimestamp(1408929205),
+             "location": "City Hall",
+             "media": [
+                 {"date": "2014-04-12",
+                  "type": "recording",
+                  "name": "Recording of the meeting",
+                  "links": [
+                      {"mimetype": "video/mp4",
+                       "url": "http://example.com/video.mp4"},
+                      {"mimetype": "video/webm",
+                       "url": "http://example.com/video.webm"},
+                  ],
+                  "offset": 19,
+                }
+             ]},
+            {"name": "Meeting of the Join Committee on Baz",
+             "when": dt.datetime.fromtimestamp(1418929205),
+             "location": "City Hall",
+             "participants": [
+                 {"note": "Meeting Chair",
+                  "type": "person",
+                  "name": "Yandel V. Watkins",},
+                 {"note": "Attending Committee",
+                  "type": "organization",
+                  "name": "Ways and Means",},
+             ],
+             "links": [
+                {"note": "Council Homepage",
+                 "url": "http://council.example.com",},
+                {"note": "Background on the topic",
+                 "url": "http://topic.news.example.com/",}
+             ],},
+            {"name": "Meeting of the Join Committee on Bar",
+             "when": dt.datetime.fromtimestamp(1008923205),
+             "location": "Council Chambers",
+             "documents": [
+                 {"url": "http://someone.example.com/slides.html",
+                  "mimetype": "text/html",
+                  "name": "HTML Slides",},
+                 {"url": "http://someone.example.com/slides.ppt",
+                  "mimetype": "application/vnd.ms-powerpoint",
+                  "name": "Powerpoint of the Slides",},
+                 {"url": "http://test.example.com/otherthing.ogg",
+                  "mimetype": "audio/ogg",
+                  "name": "Background Music",},
+             ],
+            },
+            {"name": "Meeting of the Join Committee on Fnord",
+             "when": dt.datetime.fromtimestamp(1418929205),
+             "location": "City Hall",
+             "agenda": [
+                {"related_entities": [
+                 {"note": "Yandel will be presenting on the effects of this bill",
+                  "type": "person",
+                  "name": "Yandel V. Watkins",},
+                ],
+                "media": [
+                    {"date": "2014-04-12",
+                     "type": "recording",
+                     "name": "Recording of the meeting",
+                     "links": [
+                         {"mimetype": "video/mp4",
+                          "url": "http://example.com/video.mp4"},
+                         {"mimetype": "video/webm",
+                          "url": "http://example.com/video.webm"},
+                     ],
+                     "offset": 19,
+                    }
+                ],
+                "notes": [
+                    {"description": "Yandel started his presentation."},
+                    {"description": "Yandel made some good points."},
+                    {"description": "Yandel sat down."},
+                ],
+                "subjects": [
+                    "testimony", "this-bill", "this-subject"
+                ],
+                "order": 0,
+                "description": "Yandel will give a talk",
+                },
+                {"related_entities": [
+                 {"note": "Mckenzie will be presenting on the effects of this bill",
+                  "type": "person",
+                  "name": "Mckenzie A. Cannon",},
+                ],
+                "media": [
+                    {"date": "2014-04-12",
+                     "type": "recording",
+                     "name": "Recording of the meeting",
+                     "links": [
+                         {"mimetype": "video/mp4",
+                          "url": "http://example.com/video.mp4"},
+                         {"mimetype": "video/webm",
+                          "url": "http://example.com/video.webm"},
+                     ],
+                     "offset": 200,
+                    }
+                ],
+                "notes": [
+                    {"description": "Mckenzie started his presentation."},
+                    {"description": "Mckenzie made some good points."},
+                    {"description": "Mckenzie made some good better points."},
+                    {"description": "Mckenzie sat down."},
+                ],
+                "subjects": [
+                    "testimony", "this-bill-2", "this-subject"
+                ],
+                "order": 1,
+                "description": "Mckenzie will give a talk",
+                },
+             ],},
+        ]
+        for e in events:
+            obj = Event(name=e['name'],
+                        when=e['when'],
+                        location=e['location'])
+            obj.add_source("http://example.com/events")
+
+            l = e.get("_location", None)
+            if l:
+                obj.location = l
+
+            for key in [
+                "media", "links", "participants", "agenda", "documents"
+            ]:
+                l = e.get(key, None)
+                if l:
+                    obj.media = l
+
+            obj.validate()
+            yield obj
+
+
     def get_people(self):
         people = [
             {"name": "Mckenzie A. Cannon", "post_id": "10a",},
@@ -274,8 +427,9 @@ class MassiveScraper(Scraper):
             )
             yield l
 
-        yield from self.get_committees()
-        yield from self.get_bills()
+        yield from self.get_events()
+        # yield from self.get_committees()
+        # yield from self.get_bills()
 
 
 class TestLegislature(Jurisdiction):
