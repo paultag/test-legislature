@@ -2,6 +2,7 @@
 from pupa.scrape.jurisdiction import Jurisdiction
 from pupa.scrape import Scraper, Legislator, Committee
 from pupa.scrape import Bill, Vote, Event
+from pupa.utils import make_psuedo_id
 import datetime as dt
 
 
@@ -61,9 +62,9 @@ class MassiveScraper(Scraper):
 
             members = iter(committee['members'])
             chair = next(members)
-            c.add_member(name=chair, role='chair')
+            c.add_member(name_or_person=chair, role='chair')
             for member in members:
-                c.add_member(name=member)
+                c.add_member(name_or_person=member)
             yield c
 
     def get_bills(self):
@@ -74,23 +75,23 @@ class MassiveScraper(Scraper):
              "versions": ["http://example.com/HB500.pdf"],
              "actions": [
                  {"description": "Introduced",
-                  "actor": "council",
+                  "actor": "Committee on Pudding Pops",
                   "date": "2014-04-15",},
 
                  {"date": "2014-04-15",
                   "description": "Read first time. Referred to Committee on Commerce and Labor. To printer.",
-                  "actor": "council" },
+                  "actor": "Test City Council" },
 
                  {"date": "2014-04-15",
                   "description": "From printer. To committee.",
-                  "actor": "lower"},
+                  "actor": "Test City Council"},
 
                  {"date": "2014-04-15",
                   "description": "From committee: Do pass.",
-                  "actor": "lower"},
+                  "actor": "Rules"},
 
                  {"description": "Signed into law",
-                  "actor": "council",
+                  "actor": "Fiscal Committee",
                   "date": "2014-04-19",},
              ],
              "sponsors_people": [
@@ -103,7 +104,7 @@ class MassiveScraper(Scraper):
                  "other_count": 1,
                  "no_count": 3,
                  "passed": True,
-                 "type": "passage",
+                 "type": "passage:bill",
                  "date": "2014-04-15",
                  "session": "2011",
                  "roll": {
@@ -157,7 +158,7 @@ class MassiveScraper(Scraper):
                  "yes_count": 3,
                  "no_count": 1,
                  "passed": True,
-                 "type": "passage",
+                 "type": "passage:bill",
                  "date": "2014-04-18",
                  "session": "2011",
                  "roll": {
@@ -177,20 +178,23 @@ class MassiveScraper(Scraper):
         ]
 
         for bill in bills:
-            b = Bill(name=bill['name'],
+            b = Bill(identifier=bill['name'],
                      title=bill['title'],
                      session=bill['session'])
             b.add_source("ftp://example.com/some/bill")
 
 
             for vote in bill['votes']:
-                v = Vote(motion=vote['motion'],
-                         organization="Test City Council",
+                v = Vote(motion_text=vote['motion'],
+                         organization_id=make_psuedo_id(
+                             name="Test City Council",
+                             classification="legislature"
+                         ),
                          yes_count=vote['yes_count'],
                          no_count=vote['no_count'],
-                         passed=vote['passed'],
-                         type=vote['type'],
-                         date=vote['date'],
+                         result='pass' if vote['passed'] else 'fail',
+                         classification=vote['type'],
+                         start_date=vote['date'],
                          session=vote['session'],
                         )
                 v.add_source("http://example.com/votes/vote.xls")
@@ -205,17 +209,20 @@ class MassiveScraper(Scraper):
 
 
             for sponsor in bill['sponsors_people']:
-                b.add_sponsor(name=sponsor, sponsorship_type='primary',
+                b.add_sponsorship(name=sponsor, classification='primary',
                               entity_type='person', primary=True)
 
             for sponsor in bill['sponsors_committee']:
-                b.add_sponsor(name=sponsor, sponsorship_type='primary',
+                b.add_sponsorship(name=sponsor, classification='primary',
                               entity_type='organization', primary=True)
 
             for version in bill['versions']:
-                b.add_version_link(name="Bill Version", url=version)
+                b.add_version_link(note="Bill Version", url=version)
 
             for action in bill['actions']:
+                action['organization'] = make_psuedo_id(name=action.pop(
+                    'actor'
+                ))
                 b.add_action(**action)
 
             yield b
@@ -224,10 +231,10 @@ class MassiveScraper(Scraper):
     def get_events(self):
         events = [
             {"name": "Meeting of the Join Committee on Foo",
-             "when": dt.datetime.fromtimestamp(1408923205),
+             "start_time": dt.datetime.fromtimestamp(1408923205),
              "location": "Somewhere just east of Northwestsouthshire"},
             {"name": "Meeting of the Join Committee on Bar",
-             "when": dt.datetime.fromtimestamp(1008923205),
+             "start_time": dt.datetime.fromtimestamp(1008923205),
              "location": "Council Chambers",
              "_location": {
                  "name": "Council Chambers",
@@ -239,7 +246,7 @@ class MassiveScraper(Scraper):
                  }
             }},
             {"name": "Meeting of the Join Committee on Baz",
-             "when": dt.datetime.fromtimestamp(1408929205),
+             "start_time": dt.datetime.fromtimestamp(1408929205),
              "location": "City Hall",
              "media": [
                  {"date": "2014-04-12",
@@ -255,7 +262,7 @@ class MassiveScraper(Scraper):
                 }
              ]},
             {"name": "Meeting of the Join Committee on Baz",
-             "when": dt.datetime.fromtimestamp(1418929205),
+             "start_time": dt.datetime.fromtimestamp(1418929205),
              "location": "City Hall",
              "participants": [
                  {"note": "Meeting Chair",
@@ -272,7 +279,7 @@ class MassiveScraper(Scraper):
                  "url": "http://topic.news.example.com/",}
              ],},
             {"name": "Meeting of the Join Committee on Bar",
-             "when": dt.datetime.fromtimestamp(1008923205),
+             "start_time": dt.datetime.fromtimestamp(1008923205),
              "location": "Council Chambers",
              "documents": [
                  {"url": "http://someone.example.com/slides.html",
@@ -287,7 +294,7 @@ class MassiveScraper(Scraper):
              ],
             },
             {"name": "Meeting of the Join Committee on Fnord",
-             "when": dt.datetime.fromtimestamp(1418929205),
+             "start_time": dt.datetime.fromtimestamp(1418929205),
              "location": "City Hall",
              "agenda": [
                 {"related_entities": [
@@ -353,7 +360,7 @@ class MassiveScraper(Scraper):
         ]
         for e in events:
             obj = Event(name=e['name'],
-                        when=e['when'],
+                        start_time=e['start_time'],
                         location=e['location'])
             obj.add_source("http://example.com/events")
 
@@ -418,7 +425,8 @@ class MassiveScraper(Scraper):
 
 
 class TestLegislature(Jurisdiction):
-    jurisdiction_id = "ocd-jurisdiction/country:xx/legislature"
+    division_id = "ocd-division/country:xx"
+    classification = "government"
     name = "Test City Council"
     url = "http://example.com"
 
