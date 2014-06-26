@@ -316,15 +316,15 @@ class MassiveScraper(Scraper):
                     }
                 ],
                 "notes": [
-                    {"description": "Yandel started his presentation."},
-                    {"description": "Yandel made some good points."},
-                    {"description": "Yandel sat down."},
+                    "Yandel started his presentation.",
+                    "Yandel made some good points.",
+                    "Yandel sat down.",
                 ],
                 "subjects": [
                     "testimony", "this-bill", "this-subject"
                 ],
-                "order": 0,
-                "description": "Yandel will give a talk",
+                "order": '0',
+               "description": "Yandel will give a talk",
                 },
                 {"related_entities": [
                  {"note": "Mckenzie will be presenting on the effects of this bill",
@@ -345,15 +345,15 @@ class MassiveScraper(Scraper):
                     }
                 ],
                 "notes": [
-                    {"description": "Mckenzie started his presentation."},
-                    {"description": "Mckenzie made some good points."},
-                    {"description": "Mckenzie made some good better points."},
-                    {"description": "Mckenzie sat down."},
+                    "Mckenzie started his presentation.",
+                    "Mckenzie made some good points.",
+                    "Mckenzie made some good better points.",
+                    "Mckenzie sat down.",
                 ],
                 "subjects": [
                     "testimony", "this-bill-2", "this-subject"
                 ],
-                "order": 1,
+                "order": '1',
                 "description": "Mckenzie will give a talk",
                 },
              ],},
@@ -373,7 +373,7 @@ class MassiveScraper(Scraper):
             ]:
                 l = e.get(key, None)
                 if l:
-                    obj.media = l
+                    setattr(obj, key, l)
 
             obj.validate()
             yield obj
@@ -433,19 +433,3 @@ class TestLegislature(Jurisdiction):
     scrapers = {
         "people": MassiveScraper,
     }
-
-    # def get_metadata(self):
-    #     return {'name': 'Test City Council',
-    #             'url': 'https://example.com/',
-    #             'terms': [{ 'name': '2011-2015', 'sessions': ['2011'],
-    #                        'start_year': 2011, 'end_year': 2015 }],
-    #             'provides': ['people',],
-    #             'parties': [
-    #                 {"name": "Republican"},
-    #                 {"name": "Democratic"},
-    #             ],
-    #             'session_details': {
-    #                 '2011': {'_scraped_name': '2011'},
-    #             },
-    #             'feature_flags': [],
-    #    }
