@@ -180,7 +180,7 @@ class MassiveScraper(Scraper):
         for bill in bills:
             b = Bill(identifier=bill['name'],
                      title=bill['title'],
-                     session=bill['session'])
+                     legislative_session=bill['session'])
             b.add_source("ftp://example.com/some/bill")
 
 
@@ -195,7 +195,7 @@ class MassiveScraper(Scraper):
                          result='pass' if vote['passed'] else 'fail',
                          classification=vote['type'],
                          start_date=vote['date'],
-                         session=vote['session'],
+                         legislative_session=vote['session'],
                         )
                 v.add_source("http://example.com/votes/vote.xls")
 
